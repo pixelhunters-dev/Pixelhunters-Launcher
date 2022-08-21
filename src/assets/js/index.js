@@ -39,27 +39,24 @@ class Splash {
         this.splashAuthor.classList.add("opacity");
         this.message.classList.add("opacity");
         await sleep(1000);
-        this.maintenanceCheck();
-    }
-
-    async maintenanceCheck() {
-        if (dev) return this.startLauncher();
-        config.GetConfig().then(res => {
-            if (res.maintenance) return this.shutdown(res.maintenance_message);
-            else this.checkUpdate();
-        }).catch(e => {
-            console.error(e);
-            return this.shutdown("Aucune connexion internet détectée,<br>veuillez réessayer ultérieurement.");
-        })
+        this.checkUpdate();
     }
 
     async checkUpdate() {
+        if (dev) return this.startLauncher();
         this.setStatus(`recherche de mise à jour...`);
-        ipcRenderer.send('update-app');
+
+        ipcRenderer.invoke('update-app').then(err => {
+            if(err.error) {
+                let error = err.message;
+                this.shutdown(`erreur lors de la recherche de mise à jour :<br>${error}`);
+            }
+        })
 
         ipcRenderer.on('updateAvailable', () => {
             this.setStatus(`Mise à jour disponible !`);
             this.toggleProgress();
+            ipcRenderer.send('start-update');
         })
 
         ipcRenderer.on('download-progress', (event, progress) => {
@@ -67,7 +64,18 @@ class Splash {
         })
 
         ipcRenderer.on('update-not-available', () => {
-            this.startLauncher();
+            this.maintenanceCheck();
+        })
+    }
+
+    async maintenanceCheck() {
+        if (dev) return this.startLauncher();
+        config.GetConfig().then(res => {
+            if (res.maintenance) return this.shutdown(res.maintenance_message);
+            else this.startLauncher();
+        }).catch(e => {
+            console.error(e);
+            return this.shutdown("Aucune connexion internet détectée,<br>veuillez réessayer ultérieurement.");
         })
     }
 

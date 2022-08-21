@@ -62,14 +62,27 @@ app.on('window-all-closed', () => {
 
 autoUpdater.autoDownload = false;
 
-ipcMain.on('update-app', () => {
-    autoUpdater.checkForUpdates();
+ipcMain.handle('update-app',() => {
+    return new Promise(async(resolve, reject) => {
+        autoUpdater.checkForUpdates().then(() => {
+            resolve();
+        }).catch(error => {
+            resolve({
+                error: true,
+                message: error
+            })
+        })
+    })
 })
 
 autoUpdater.on('update-available', () => {
     const updateWindow = UpdateWindow.getWindow();
     if (updateWindow) updateWindow.webContents.send('updateAvailable');
 });
+
+ipcMain.on('start-update', () => {
+    autoUpdater.downloadUpdate();
+})
 
 autoUpdater.on('update-not-available', () => {
     const updateWindow = UpdateWindow.getWindow();
