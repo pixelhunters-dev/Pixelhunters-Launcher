@@ -1,7 +1,7 @@
 {
     "name": "Pixelhunters-Launcher",
     "preductname": "Pixelhunters Launcher",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Launcher Mincraft custom (crack, premium)",
     "main": "src/app.js",
     "author": "Luuxis",
@@ -20,7 +20,7 @@
     },
     "dependencies": {
         "electron-updater": "^5.0.1",
-        "minecraft-java-core": "^2.1.1",
+        "minecraft-java-core": "^2.3.0",
         "node-fetch": "^2.6.7"
     },
     "devDependencies": {
